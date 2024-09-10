@@ -4,14 +4,21 @@ import openai
 import os
 import re
 
+import base64
+from PIL import Image
+from io import BytesIO
+
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
-TESTING = True
+TESTING = False
 
 # Load environmental variables
 from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ASSISTANT_ID = os.getenv("OPENAI_ASSISTANT_ID")
+
+IMG_MODEL =  "dall-e-3"   #"dall-e-3"      #dall-e-2" 
+IMG_SIZE = '1792x1024'   #'1792x1024'     "1024x1024"
 
 # Set up the OpenAI client with the actual API key
 openai.api_key = OPENAI_API_KEY
@@ -20,14 +27,12 @@ openai.api_key = OPENAI_API_KEY
 debug_dir = 'img/debug/'
 test_image_path = "img/debug/img/"
 
-# Function to read from a file in testing mode
-def read_from_file(filename):
-    filepath = os.path.join(debug_dir, filename)
-    if os.path.exists(filepath):
-        with open(filepath, 'r') as f:
-            return f.read()
-    else:
-        return "File not found"
+# Paths for output generation
+generation_dir = 'img/gen/'
+
+# TODO: Find the way to collect outputs from different testers.
+
+
 
 # Function to interact with OpenAI API or read from files in TESTING mode
 def execute_openai_command(conversation_history, command, command_type):
@@ -77,9 +82,46 @@ def execute_openai_command(conversation_history, command, command_type):
 
         return response
 
+def generate_image_with_openai(prompt, output_path="imgtest.webp"):
+    try:
+        # Make the API call to generate the image
+        response = openai.images.generate(
+            model=IMG_MODEL,
+            prompt=prompt,
+            n=1,
+            size=IMG_SIZE,  # Adjust the size as per your requirement
+            response_format="b64_json"
+        )
+        
+        # Decode the Base64 string into binary data
+        image_data = base64.b64decode(response.data[0].b64_json)
+        
+        # Convert the binary data into an image using PIL
+        image = Image.open(BytesIO(image_data))
+        
+        # Save the image in WebP format
+        file_path = os.path.join(generation_dir,output_path)
+        image.save(file_path, format="WEBP")
+        
+        return file_path
+    except Exception as e:
+        st.error(f"An error occurred while generating image: {e}")
+        return None
+
+
+
+# Function to read from a file in testing mode
+def read_from_file(filename):
+    filepath = os.path.join(debug_dir, filename)
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as f:
+            return f.read()
+    else:
+        return "File not found"
+
 # Function to save responses to text files for inspection
 def save_to_txt(filename, content):
-    filepath = os.path.join(debug_dir, filename)
+    filepath = os.path.join(generation_dir, filename)
     with open(filepath, 'w') as f:
         f.write(content)
 
@@ -196,6 +238,7 @@ def split_trivia_question_answer(question):
         "explanation": explanation_text
     }
 
+
 # Streamlit app
 def main():
     st.title("Interactive OpenAI Assistant")
@@ -308,6 +351,7 @@ def main():
                 # Add the "Generate Image" button
                 if st.button("Generate Image", key="generate_image_easy"):
                     if TESTING:
+                        ## IMAGE NON GENERATED (TEST)
                         image_path = os.path.join(test_image_path, "easy_image.webp")
                         if os.path.exists(image_path):
                             # Save the image path in session state for persistence
@@ -315,10 +359,11 @@ def main():
                         else:
                             st.write("No image found for Easy difficulty.")
                     else:
-                        st.write("Image generation is disabled in TESTING mode.")
-                        # HERE IMPLEMENT AI image generation logic
-                        ### generated_image = generate_image_with_ai(...)
-                        ### st.session_state['generated_image_easy'] = generated_image
+                        ## AI IMAGE GENERATION
+                        image_easy_path = generate_image_with_openai(st.session_state['easy_image_prompt'], output_path="easy_image.webp")  # GENERATE PATH
+                        if os.path.exists(image_easy_path):
+                            st.session_state['generated_image_easy'] = image_easy_path
+                        
 
                 # If the image has been generated, display it persistently
                 if st.session_state['generated_image_easy'] is not None:
@@ -354,10 +399,10 @@ def main():
                         else:
                             st.write("No image found for Medium difficulty.")
                     else:
-                        st.write("Image generation is disabled in TESTING mode.")
-                        # HERE IMPLEMENT AI image generation logic
-                        ### generated_image = generate_image_with_ai(...)
-                        ### st.session_state['generated_image_medium'] = generated_image
+                        ## AI IMAGE GENERATION
+                        image_medium_path = generate_image_with_openai(st.session_state['medium_image_prompt'], output_path="medium_image.webp")  
+                        if os.path.exists(image_medium_path):
+                            st.session_state['generated_image_medium'] = image_medium_path
                 
                 # If the image has been generated, display it persistently
                 if st.session_state['generated_image_medium'] is not None:
@@ -390,10 +435,10 @@ def main():
                         else:
                             st.write("No image found for Hard difficulty.")
                     else:
-                        st.write("Image generation is disabled in TESTING mode.")
-                        #### HERE IMPLEMENT AI
-                        ### generated_image = generate_image_with_ai(...)
-                        #### st.session_state['generated_image_hard'] = generated_image
+                        ## AI IMAGE GENERATION
+                        image_hard_path = generate_image_with_openai(st.session_state['hard_image_prompt'], output_path="hard_image.webp")  
+                        if os.path.exists(image_hard_path):
+                            st.session_state['generated_image_hard'] = image_hard_path
                 
                 
                 # If the image has been generated, display it persistently
