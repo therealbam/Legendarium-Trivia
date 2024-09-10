@@ -8,15 +8,15 @@ jupyterlab==3.3.4
 #seaborn==0.11.2
 plotly==5.8.0
 matplotlib==3.7.1
-#seaborn==0.12.2
 #nb-black==1.0.7
 nbstripout==0.5.0
 yfinance==0.2.18
-streamlit==1.9.0
+streamlit==1.38.0
 altair==4.1.0
 coinmetrics.api_client==2022.*
 plotly_express==0.4.1
 python-dotenv==1.0.1
+openai==1.43.0
 
 
 protobuf==3.19.0

@@ -45,6 +45,7 @@ Make sure you have an .env file containing your OpenAI API key:
 ```bash
 # .env
 OPENAI_API_KEY=your-openai-api-key
+OPENAI_ASSISTANT_ID=your-openai-assistant-id
 ```
 
 ## Running the Application
@@ -52,7 +53,7 @@ OPENAI_API_KEY=your-openai-api-key
 ### To run the application locally, use Streamlit:
 
 ```bash
-streamlit run __main__.py
+streamlit run src/LoTR.py
 ```
 
 ### Docker
@@ -110,6 +111,7 @@ Make sure to set the following environment variables in your `.env` file:
 
 ```plaintext
 OPENAI_API_KEY=your-openai-api-key
+OPENAI_ASSISTANT_ID=your-openai-assistant-id
 ```
 
 ## Contributing
