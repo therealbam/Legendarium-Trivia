@@ -1,0 +1,15 @@
+### Easy Question Image Prompt:
+**Image Prompt:**  
+'Create a wide 8-bit pixel art style image depicting the city of Gondolin under siege. Key elements include towering white walls, fires burning in several locations, and dark figures of Orcs attacking. In the foreground, a silhouette of Maeglin can be seen watching, highlighting his role in the betrayal. The chaotic scene is set against a backdrop of dark clouds and flames illuminating the night sky. Maintain the early video game aesthetic with a vibrant but limited color palette.'
+
+---
+
+### Medium Question Image Prompt:
+**Image Prompt:**  
+'Create a wide 8-bit pixel art style image portraying the characters Eöl and Aredhel. Key elements include Eöl, depicted as a dark and brooding figure, and Aredhel, a fair and bright character, standing in the dark woods of Nan Elmoth. Background details feature twisted trees and faint hints of light filtering through the branches, representing the contrast between their influences on Maeglin. Maintain the early video game aesthetic with a vibrant but limited color palette.'
+
+---
+
+### Hard Question Image Prompt:
+**Image Prompt:**  
+'Create a wide 8-bit pixel art style image illustrating the moment of Maeglin's confrontation with Tuor during the Fall of Gondolin. Key elements include Maeglin, appearing menacing with a sword drawn, and Tuor, standing defiantly ready to protect Idril. The backdrop shows the crumbling walls of Gondolin and flames in the distance, capturing the chaos of the battle. Clouds of smoke add drama to the scene, emphasizing the epic nature of the conflict. Maintain the early video game aesthetic with a vibrant but limited color palette.'

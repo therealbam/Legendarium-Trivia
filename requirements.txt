@@ -1,0 +1,24 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+numpy==1.21.*
+pyarrow==11.*
+pandas==1.4.*
+black==22.3.0
+jupyter==1.0.0
+jupyterlab==3.3.4
+#seaborn==0.11.2
+plotly==5.8.0
+matplotlib==3.7.1
+#seaborn==0.12.2
+#nb-black==1.0.7
+nbstripout==0.5.0
+yfinance==0.2.18
+streamlit==1.9.0
+altair==4.1.0
+coinmetrics.api_client==2022.*
+plotly_express==0.4.1
+python-dotenv==1.0.1
+
+
+protobuf==3.19.0
+
+# How to do this? %pip install "modin[all]"
