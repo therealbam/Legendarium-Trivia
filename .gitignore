@@ -22,6 +22,7 @@ venv/
 /img/debug/backup
 /img/debug/backup_copy
 /src/lotr_temp.py
+/src/image_gen.py
 
 # Results
 /img/gen
