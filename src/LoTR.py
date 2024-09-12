@@ -9,7 +9,7 @@ from PIL import Image
 from io import BytesIO
 
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
-TESTING = True
+TESTING = False
 
 
 # Load environmental variables
