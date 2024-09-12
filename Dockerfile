@@ -26,8 +26,11 @@ WORKDIR /app
 # Copy the content of the app to the working directory
 COPY . /app
 
+# GCLOUD
+ENV PORT 8080
+
 # Expose the default port used by Streamlit
-EXPOSE 8501
+EXPOSE 8080
 
 # Command to run the Streamlit app, update this path to src/LoTR.py
-CMD ["streamlit", "run", "src/LoTR.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "src/LoTR.py", "--server.port=8080", "--server.address=0.0.0.0"]

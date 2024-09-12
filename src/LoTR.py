@@ -11,15 +11,25 @@ from io import BytesIO
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
 TESTING = False
 
+
 # Load environmental variables
 from dotenv import load_dotenv
-load_dotenv()
+
+# Set the port to listen on
+port = int(os.environ.get('PORT', 8080))
+
+# Check if we are in production or development
+if os.getenv('ENVIRONMENT') != 'PRODUCTION':
+    load_dotenv()  # Only load .env file if not in production
+
+# Get the environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ASSISTANT_ID = os.getenv("OPENAI_ASSISTANT_ID")
 
+
 PROMPT_INIT="[Request a summary of a Chapter of Silmarillion or information about specific Characters or events]"
-IMG_MODEL =  "dall-e-3"   #"dall-e-3"      #dall-e-2" 
-IMG_SIZE = '1792x1024'   #'1792x1024'     "1024x1024"
+IMG_MODEL =  "dall-e-2"   #"dall-e-3"      #dall-e-2" 
+IMG_SIZE = '1024x1024'   #'1792x1024'     "1024x1024"
 
 # Set up the OpenAI client with the actual API key
 openai.api_key = OPENAI_API_KEY
@@ -30,6 +40,10 @@ test_image_path = "img/debug/img/"
 
 # Paths for output generation
 generation_dir = 'img/gen/'
+
+# Ensure the generation directory exists (to save the generated images)
+if not os.path.exists(generation_dir):
+    os.makedirs(generation_dir)
 
 # TODO: Find the way to collect outputs from different testers.
 
