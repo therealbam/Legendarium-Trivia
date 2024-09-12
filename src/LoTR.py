@@ -9,7 +9,7 @@ from PIL import Image
 from io import BytesIO
 
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
-TESTING = False
+TESTING = True
 
 
 # Load environmental variables
@@ -28,8 +28,8 @@ OPENAI_ASSISTANT_ID = os.getenv("OPENAI_ASSISTANT_ID")
 
 
 PROMPT_INIT="[Request a summary of a Chapter of Silmarillion or information about specific Characters or events]"
-IMG_MODEL =  "dall-e-2"   #"dall-e-3"      #dall-e-2" 
-IMG_SIZE = '1024x1024'   #'1792x1024'     "1024x1024"
+IMG_MODEL =  "dall-e-3"   #"dall-e-3"      #dall-e-2" 
+IMG_SIZE = '1792x1024'   #'1792x1024'     "1024x1024"
 
 # Set up the OpenAI client with the actual API key
 openai.api_key = OPENAI_API_KEY
