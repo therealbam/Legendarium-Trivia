@@ -17,6 +17,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ASSISTANT_ID = os.getenv("OPENAI_ASSISTANT_ID")
 
+PROMPT_INIT="[Request a summary of a Chapter of Silmarillion or information about specific Characters or events]"
 IMG_MODEL =  "dall-e-3"   #"dall-e-3"      #dall-e-2" 
 IMG_SIZE = '1792x1024'   #'1792x1024'     "1024x1024"
 
@@ -241,7 +242,7 @@ def split_trivia_question_answer(question):
 
 # Streamlit app
 def main():
-    st.title("Interactive OpenAI Assistant")
+    st.title("Legendarium - An AI Trivia & Image Generator")
 
     # Initialize session state for conversation history and responses
     if 'conversation_history' not in st.session_state:
@@ -276,7 +277,7 @@ def main():
 
     # Sidebar for input
     with st.sidebar:
-        user_input = st.text_area("Enter your query:", value="Of Valanquenta from The Silmarillion", key="query_input")
+        user_input = st.text_area("Enter your query:", value=PROMPT_INIT, key="query_input")
 
         # Button to generate the summary, trivia, and image prompts
         if st.button("Get Summary & Trivia"):
