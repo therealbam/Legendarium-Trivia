@@ -9,7 +9,7 @@ from PIL import Image
 from io import BytesIO
 
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
-TESTING = True
+TESTING = False
 
 # Load environmental variables
 from dotenv import load_dotenv
@@ -146,24 +146,6 @@ def format_question_text(question_text):
 # Function to split trivia questions (easy, medium, hard)
 def split_trivia(text):
     try:
-        easy_question = re.search(r"Easy Question:(.*?)(###|$)", text, re.DOTALL).group(1).strip()
-    except AttributeError:
-        easy_question = "No Easy Question Found"
-
-    try:
-        medium_question = re.search(r"Medium Question:(.*?)(###|$)", text, re.DOTALL).group(1).strip()
-    except AttributeError:
-        medium_question = "No Medium Question Found"
-
-    try:
-        hard_question = re.search(r"Hard Question:(.*)", text, re.DOTALL).group(1).strip()
-    except AttributeError:
-        hard_question = "No Hard Question Found"
-
-    return easy_question, medium_question, hard_question
-
-def split_trivia(text):
-    try:
         # Extract the easy question without capturing the divider "---"
         easy_question = re.search(r"Easy Question:(.*?)(?=\n---|\n###|$)", text, re.DOTALL).group(1).strip()
     except AttributeError:
@@ -182,21 +164,6 @@ def split_trivia(text):
         hard_question = "No Hard Question Found"
 
     return easy_question, medium_question, hard_question
-# Improved function to split image prompts by extracting the text between single quotes
-def split_image_prompts(text):
-    # Adjusted regex to account for possessive forms like "Legolas' child"
-    matches = re.findall(r"'(.*?)'(?!\w|'s)", text, re.DOTALL)
-
-    # Debug: Print the matches found
-    if len(matches) < 3:
-        print(f"Found {len(matches)} matches. Here they are: {matches}")
-
-    # Assign the found matches to easy, medium, and hard prompts
-    easy_prompt = matches[0].strip() if len(matches) > 0 else "No Easy Image Prompt Found"
-    medium_prompt = matches[1].strip() if len(matches) > 1 else "No Medium Image Prompt Found"
-    hard_prompt = matches[2].strip() if len(matches) > 2 else "No Hard Image Prompt Found"
-
-    return easy_prompt, medium_prompt, hard_prompt
 
 # Function to split image prompts based on "Create" and ending on line break, single quote, or dot followed by a line break
 def split_image_prompts(text):
@@ -245,6 +212,63 @@ def split_trivia_question_answer(question):
         "answer": answer_text,
         "explanation": explanation_text
     }
+
+
+
+# Function to display trivia question and handle image generation
+def display_trivia_section(difficulty_key, question_data_key, image_prompt_key):
+    # Retrieve the question data from session state
+    question_data = st.session_state[question_data_key]
+    
+    st.write("**Trivia Question:**")
+    st.write(question_data['question'])
+    
+    # Add show/hide toggle for the answer
+    if st.checkbox("Show Answer", key=f"{difficulty_key}_answer"):    
+        st.write(question_data['answer'])
+        st.write(question_data['explanation'])
+    
+    st.write("---")
+    
+    # Initialize session state for the generated image if not already done
+    generated_image_key = f'generated_image_{difficulty_key}'
+    if generated_image_key not in st.session_state:
+        st.session_state[generated_image_key] = None
+    
+    # Define the image filename based on difficulty
+    output_image_name = f"{difficulty_key}_image.webp"
+    
+    # Add the "Generate Image" button
+    if st.button("Generate Image", key=f"generate_image_{difficulty_key}"):
+        if TESTING:
+            # Use predefined image paths for testing
+            image_path = os.path.join(test_image_path, output_image_name)
+            if os.path.exists(image_path):
+                # Save the image path in session state for persistence
+                st.session_state[generated_image_key] = image_path
+            else:
+                st.write(f"No image found for {difficulty_key.capitalize()} difficulty.")
+        else:
+            # Generate the image using OpenAI API
+            image_path = generate_image_with_openai(
+                st.session_state[image_prompt_key],
+                output_path=output_image_name
+            )
+            if image_path:
+                st.session_state[generated_image_key] = image_path
+            else:
+                st.error("Failed to generate image.")
+    
+    # Display the image if it has been generated
+    if st.session_state[generated_image_key] is not None:
+        st.image(
+            st.session_state[generated_image_key],
+            caption=st.session_state[image_prompt_key],
+            use_column_width=True
+        )
+    else:
+        st.write("**Image Prompt:**")
+        st.write(st.session_state[image_prompt_key])
 
 
 # Streamlit app
@@ -339,122 +363,32 @@ def main():
         with tab2:
             # Dropdown to select difficulty level
             difficulty = st.selectbox("Select difficulty level", ["Easy", "Medium", "Hard"])
+            # Map difficulty levels to their corresponding session state keys
+            difficulty_keys = {
+                "Easy": {
+                    "question_data_key": "easy_question",
+                    "image_prompt_key": "easy_image_prompt"
+                },
+                "Medium": {
+                    "question_data_key": "medium_question",
+                    "image_prompt_key": "medium_image_prompt"
+                },
+                "Hard": {
+                    "question_data_key": "hard_question",
+                    "image_prompt_key": "hard_image_prompt"
+                }
+            }
+            
+            # Get the keys for the selected difficulty
+            keys = difficulty_keys[difficulty]
+            
+            # Call the reusable function with appropriate keys
+            display_trivia_section(
+                difficulty_key=difficulty.lower(),
+                question_data_key=keys["question_data_key"],
+                image_prompt_key=keys["image_prompt_key"]
+            )
 
-######### EASY #########
-
-            if difficulty == "Easy":
-                st.write("**Trivia Question:**")
-                st.write(st.session_state['easy_question']['question'])
-
-                # Add show/hide toggle for the answer
-                if st.checkbox("Show Answer", key="easy_answer"):    
-                    st.write(st.session_state['easy_question']['answer'])
-                    st.write(st.session_state['easy_question']['explanation'])  
-                st.write("---")
-
-                # Ensure the session state for the generated image is initialized
-                if 'generated_image_easy' not in st.session_state:
-                    st.session_state['generated_image_easy'] = None
-
-                # Add the "Generate Image" button
-                if st.button("Generate Image", key="generate_image_easy"):
-                    if TESTING:
-                        ## IMAGE NON GENERATED (TEST)
-                        image_path = os.path.join(test_image_path, "easy_image.webp")
-                        if os.path.exists(image_path):
-                            # Save the image path in session state for persistence
-                            st.session_state['generated_image_easy'] = image_path
-                        else:
-                            st.write("No image found for Easy difficulty.")
-                    else:
-                        ## AI IMAGE GENERATION
-                        image_easy_path = generate_image_with_openai(st.session_state['easy_image_prompt'], output_path="easy_image.webp")  # GENERATE PATH
-                        if os.path.exists(image_easy_path):
-                            st.session_state['generated_image_easy'] = image_easy_path
-                        
-
-                # If the image has been generated, display it persistently
-                if st.session_state['generated_image_easy'] is not None:
-                    st.image(st.session_state['generated_image_easy'], caption=st.session_state['easy_image_prompt'], use_column_width=True)
-                else:
-                    st.write("**Image Prompt:**")
-                    st.write(st.session_state['easy_image_prompt'])
-
-######### MEDIUM #########
-
-
-
-            elif difficulty == "Medium":
-                st.write("**Trivia Question:**")
-                st.write(st.session_state['medium_question']['question'])
-
-                # Add show/hide toggle for the answer
-                if st.checkbox("Show Answer", key="medium_answer"):    
-                    st.write(st.session_state['medium_question']['answer'])
-                    st.write(st.session_state['medium_question']['explanation'])
-
-                st.write("---")
-
-                if 'generated_image_medium' not in st.session_state:
-                    st.session_state['generated_image_medium'] = None
-
-                # Add the "Generate Image" button
-                if st.button("Generate Image", key="generate_image_medium"):
-                    if TESTING:
-                        image_path = os.path.join(test_image_path, "medium_image.webp")
-                        if os.path.exists(image_path):
-                            st.session_state['generated_image_medium'] = image_path
-                        else:
-                            st.write("No image found for Medium difficulty.")
-                    else:
-                        ## AI IMAGE GENERATION
-                        image_medium_path = generate_image_with_openai(st.session_state['medium_image_prompt'], output_path="medium_image.webp")  
-                        if os.path.exists(image_medium_path):
-                            st.session_state['generated_image_medium'] = image_medium_path
-                
-                # If the image has been generated, display it persistently
-                if st.session_state['generated_image_medium'] is not None:
-                    st.image(st.session_state['generated_image_medium'], caption=st.session_state['medium_image_prompt'], use_column_width=True)
-                else:
-                    st.write("**Image Prompt:**")
-                    st.write(st.session_state['medium_image_prompt'])
-
-######### HARD #########
-
-            elif difficulty == "Hard":
-                st.write("**Trivia Question:**")
-                st.write(st.session_state['hard_question']['question'])
-                # Add show/hide toggle
-                if st.checkbox("Show Answer", key="easy_answer"):    
-                    st.write(st.session_state['hard_question']['answer'])
-                    st.write(st.session_state['hard_question']['explanation'])
-
-                st.write("---")
-
-                if 'generated_image_hard' not in st.session_state:
-                    st.session_state['generated_image_hard'] = None
-
-                # Add the "Generate Image" button
-                if st.button("Generate Image", key="generate_image_hard"):
-                    if TESTING:
-                        image_path = os.path.join(test_image_path, "hard_image.webp")
-                        if os.path.exists(image_path):
-                            st.session_state['generated_image_hard'] = image_path
-                        else:
-                            st.write("No image found for Hard difficulty.")
-                    else:
-                        ## AI IMAGE GENERATION
-                        image_hard_path = generate_image_with_openai(st.session_state['hard_image_prompt'], output_path="hard_image.webp")  
-                        if os.path.exists(image_hard_path):
-                            st.session_state['generated_image_hard'] = image_hard_path
-                
-                
-                # If the image has been generated, display it persistently
-                if st.session_state['generated_image_hard'] is not None:
-                    st.image(st.session_state['generated_image_hard'], caption=st.session_state['hard_image_prompt'], use_column_width=True)
-                else:
-                    st.write("**Image Prompt:**")
-                    st.write(st.session_state['hard_image_prompt'])
 
 # Run the app
 if __name__ == "__main__":
