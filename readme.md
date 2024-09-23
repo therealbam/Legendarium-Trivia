@@ -22,7 +22,22 @@ Before you begin, ensure you have met the following requirements:
 
 ## Project Structure
 
-/Legendarium ├── .devcontainer/ # VS Code dev container settings ├── .dockerignore # Docker ignore rules ├── .gitignore # Git ignore rules ├── .vscode/ # VS Code launch and task settings ├── Dockerfile # Docker build configuration ├── main.py # Main entry point for the Streamlit app ├── img/ # Contains debug response files and image assets ├── readme.md # Project readme file ├── requirements.txt # Python dependencies ├── src/ # Source code for trivia generation │ ├── LoTR.py # Trivia-related functions │ └── lotr_temp.py # Temporary or experimental code └── .env # (excluded) Environment file for API keys
+```bash
+/Legendarium
+├── .devcontainer/     # VS Code dev container settings
+├── .dockerignore      # Docker ignore rules
+├── .gitignore         # Git ignore rules
+├── .vscode/           # VS Code launch and task settings
+├── Dockerfile         # Docker build configuration
+├── main.py            # Main entry point for the Streamlit app
+├── img/               # Contains debug response files and image assets
+├── readme.md          # Project README file
+├── requirements.txt   # Python dependencies
+├── src/               # Source code for trivia generation
+│   ├── LoTR.py        # Trivia-related functions
+│   └── lotr_temp.py   # Temporary or experimental code (to be removed)
+└── .env               # (excluded) Environment file for API keys
+```
 
 
 ## Getting Started
