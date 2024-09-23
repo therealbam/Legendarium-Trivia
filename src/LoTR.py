@@ -7,6 +7,7 @@ import re
 import base64
 from PIL import Image
 from io import BytesIO
+from datetime import datetime
 
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
 TESTING = False
@@ -90,7 +91,7 @@ def execute_openai_command(conversation_history, command, command_type):
 
         return response
 
-def generate_image_with_openai(prompt, output_path="imgtest.webp"):
+def generate_image_with_openai(prompt, output_dir, output_filename="imgtest.webp"):
     try:
         # Make the API call to generate the image
         response = openai.images.generate(
@@ -107,8 +108,11 @@ def generate_image_with_openai(prompt, output_path="imgtest.webp"):
         # Convert the binary data into an image using PIL
         image = Image.open(BytesIO(image_data))
         
-        # Save the image in WebP format
-        file_path = os.path.join(generation_dir,output_path)
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Existing code to generate and save image...
+        file_path = os.path.join(output_dir, output_filename)
         image.save(file_path, format="WEBP")
         
         return file_path
@@ -214,7 +218,6 @@ def split_trivia_question_answer(question):
     }
 
 
-
 # Function to display trivia question and handle image generation
 def display_trivia_section(difficulty_key, question_data_key, image_prompt_key):
     # Retrieve the question data from session state
@@ -237,12 +240,18 @@ def display_trivia_section(difficulty_key, question_data_key, image_prompt_key):
     
     # Define the image filename based on difficulty
     output_image_name = f"{difficulty_key}_image.webp"
+
+
+    # Use the output directory from session state
+    output_dir = st.session_state['output_dir']
+
     
     # Add the "Generate Image" button
     if st.button("Generate Image", key=f"generate_image_{difficulty_key}"):
         if TESTING:
             # Use predefined image paths for testing
-            image_path = os.path.join(test_image_path, output_image_name)
+            test_dir = test_image_path
+            image_path = os.path.join(test_dir, output_image_name)
             if os.path.exists(image_path):
                 # Save the image path in session state for persistence
                 st.session_state[generated_image_key] = image_path
@@ -252,7 +261,8 @@ def display_trivia_section(difficulty_key, question_data_key, image_prompt_key):
             # Generate the image using OpenAI API
             image_path = generate_image_with_openai(
                 st.session_state[image_prompt_key],
-                output_path=output_image_name
+                output_dir= output_dir,
+                output_filename=output_image_name
             )
             if image_path:
                 st.session_state[generated_image_key] = image_path
@@ -306,6 +316,9 @@ def main():
     if 'hard_image_prompt' not in st.session_state:
         st.session_state['hard_image_prompt'] = None
 
+    if 'output_dir' not in st.session_state:
+        st.session_state['output_dir'] = None
+
     # Sidebar for input
     with st.sidebar:
         user_input = st.text_area("Enter your query:", value=PROMPT_INIT, key="query_input")
@@ -313,15 +326,33 @@ def main():
         # Button to generate the summary, trivia, and image prompts
         if st.button("Get Summary & Trivia"):
             if user_input:
+
+                if not TESTING:
+                    #Generate a new output directory
+                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                    output_dir = os.path.join(generation_dir, f"run_{timestamp}")
+                    os.makedirs(output_dir, exist_ok=True)
+                    st.session_state['output_dir'] = output_dir
+
                 with st.spinner("Fetching summary, trivia, and image prompts from the assistant..."):
                     try:
-                        # Step 1: Get the summary response
+                        # Step 1: Get & Save the summary response
                         summary_response = execute_openai_command(st.session_state['conversation_history'], user_input, "summary")
                         st.session_state['summary_response'] = summary_response
+                        
+                        if not TESTING: 
+                            summary_file_path = os.path.join(output_dir, "summary.txt")
+                            with open(summary_file_path, 'w') as f:
+                                f.write(summary_response)
 
                         # Step 2: Generate Trivia based on the summary
                         trivia_response = execute_openai_command(st.session_state['conversation_history'], "/trivia", "trivia")
                         st.session_state['trivia_response'] = trivia_response
+
+                        if not TESTING: 
+                            trivia_file_path = os.path.join(output_dir, "trivia.txt")
+                            with open(trivia_file_path, 'w') as f:
+                                f.write(trivia_response)
 
                         # Split trivia into easy, medium, and hard
                         easy_question, medium_question, hard_question = split_trivia(trivia_response)
