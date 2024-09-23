@@ -5,6 +5,10 @@ __pycache__/
 *.pyd
 *.sqlite3
 
+# Notebooks
+scripts/
+.ipynb_checkpoints/
+
 # Virtual environment
 env/
 venv/
@@ -17,6 +21,9 @@ venv/
 
 # Ignore OS files
 .DS_Store
+
+#
+/data
 
 # Testing
 /img/debug/backup

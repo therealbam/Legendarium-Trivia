@@ -2,6 +2,8 @@
 
 **Legendarium Trivia** is a trivia application built with **Streamlit** that generates questions and prompts about Tolkien's *Legendarium* using OpenAI. It supports image generation and features multiple difficulty levels for trivia, including **Easy**, **Medium**, and **Hard**. The project is Dockerized and can be easily deployed using Docker or Google Cloud.
 
+![A glimpse on the trivia app.](/img/output.gif)
+
 ## Features
 
 - **Trivia Questions**: Generate trivia questions about Tolkien's works (*The Silmarillion*, *The Lord of the Rings*, etc.) with easy, medium, and hard difficulty levels.
