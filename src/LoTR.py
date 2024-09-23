@@ -9,11 +9,18 @@ from PIL import Image
 from io import BytesIO
 
 # Set TESTING to True to read from pre-generated text files, False to use OpenAI API
-TESTING = False
+TESTING = True
 
 # Load environmental variables
 from dotenv import load_dotenv
-load_dotenv()
+
+# Set the port to listen on
+port = int(os.environ.get('PORT', 8080))
+
+# Check if we are in production or development
+if os.getenv('ENVIRONMENT') != 'PRODUCTION':
+    load_dotenv()  # Only load .env file if not in production
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ASSISTANT_ID = os.getenv("OPENAI_ASSISTANT_ID")
 
